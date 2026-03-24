@@ -1,0 +1,133 @@
+<head>
+	<meta charset="UTF-8">
+	<title>投稿の編集</title>
+	<style>
+		/* 全体の設定 */
+		body {
+			background-color: #141414;
+			/* Netflix風の深い黒 */
+			color: white;
+			padding: 40px;
+			font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		}
+
+		.form-container {
+			max-width: 700px;
+			margin: auto;
+			background: #2a2a2a;
+			/* カードの背景色 */
+			padding: 40px;
+			border-radius: 12px;
+			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+		}
+
+		h2 {
+			color: #e50914;
+			/* Netflixレッド */
+			margin-top: 0;
+			margin-bottom: 30px;
+		}
+
+		/* 入力エリアの共通設定 */
+		.form-group {
+			margin-bottom: 25px;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 10px;
+			color: #b3b3b3;
+			font-weight: bold;
+			font-size: 14px;
+		}
+
+		/* ★ここが重要：はみ出し防止の魔法 */
+		input[type="text"],
+		input[type="file"],
+		textarea {
+			width: 100%;
+			box-sizing: border-box;
+			/* パディングを含めて100%に収める */
+			background: #333;
+			color: white;
+			border: 1px solid #444;
+			padding: 12px;
+			border-radius: 4px;
+			font-size: 16px;
+		}
+
+		textarea {
+			resize: vertical;
+			/* 縦方向のみリサイズ可能に */
+		}
+
+		input:focus,
+		textarea:focus {
+			outline: none;
+			border-color: #e50914;
+			/* フォーカス時に赤く光らせる */
+		}
+
+		button {
+			background: #e50914;
+			color: white;
+			border: none;
+			padding: 15px;
+			width: 100%;
+			cursor: pointer;
+			font-weight: bold;
+			font-size: 16px;
+			border-radius: 4px;
+			transition: background 0.3s;
+		}
+
+		button:hover {
+			background: #ff0a16;
+		}
+
+		.cancel-link {
+			display: block;
+			text-align: center;
+			margin-top: 20px;
+			color: #b3b3b3;
+			text-decoration: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="form-container">
+		<h2>投稿を編集する</h2>
+		<form th:action="@{/post/update/{id}(id=${post.id})}" method="post" enctype="multipart/form-data">
+
+			<div class="form-group">
+				<label>映画タイトル</label>
+				<input type="text" name="movieTitle" th:value="${post.movieTitle}" required />
+			</div>
+
+			<div class="form-group">
+				<label>感想</label>
+				<textarea name="content" rows="8" th:text="${post.content}" required></textarea>
+			</div>
+
+			<div class="form-group" th:if="${post.imageUrl}">
+				<label>現在の画像</label>
+				<img th:src="${post.imageUrl}"
+					style="width: 150px; border-radius: 8px; display: block; margin-bottom: 10px;">
+			</div>
+
+			<div class="form-group">
+				<label>画像を差し替える</label>
+				<input type="file" name="imageFile" accept="image/*" />
+			</div>
+
+			<div class="form-group">
+				<label>動画を差し替える</label>
+				<input type="file" name="videoFile" accept="video/*" />
+			</div>
+
+			<button type="submit">更新を保存する</button>
+		</form>
+		<a th:href="@{/post/{id}(id=${post.id})}" class="cancel-link">キャンセル</a>
+	</div>
+</body>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>新規投稿 - MOVIES FAN</title>
+	<style>
+		body {
+			font-family: 'Helvetica Neue', Arial, sans-serif;
+			/* 背景画像の設定（映画らしい暗めの画像URLを入れるか、グラデーションに） */
+			background:url('https://t3.ftcdn.net/jpg/04/07/53/02/360_F_407530281_vHv9x4ZIxxfBRM9JOa85gZ8GW03bcpzO.jpg');
+			background-size: cover;
+			background-position: center;
+			background-attachment: fixed;
+			color: white;
+			margin: 0;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			min-height: 100vh;
+		}
+
+		.form-wrapper {
+			background: rgba(42, 42, 42, 0.95);
+			/* フォームの背景を少し透けさせる */
+			padding: 40px;
+			border-radius: 12px;
+			box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+			width: 100%;
+			max-width: 600px;
+			backdrop-filter: blur(5px);
+			/* 背景をぼかして高級感を出す */
+		}
+
+		h2 {
+			text-align: center;
+			color: #e50914;
+			margin-bottom: 30px;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+		}
+
+		label {
+			display: block;
+			margin-bottom: 8px;
+			font-weight: bold;
+			color: #ccc;
+		}
+
+		input[type="text"],
+		textarea {
+			width: 100%;
+			padding: 12px;
+			margin-bottom: 20px;
+			background: #333;
+			border: 1px solid #444;
+			border-radius: 6px;
+			color: white;
+			box-sizing: border-box;
+			/* パディングを含めた幅計算 */
+		}
+
+		input[type="file"] {
+			margin-bottom: 25px;
+			color: #bbb;
+		}
+
+		.button-group {
+			display: flex;
+			align-items: center;
+			gap: 20px;
+			margin-top: 10px;
+		}
+
+		.submit-btn {
+			background-color: #e50914;
+			color: white;
+			border: none;
+			padding: 12px 30px;
+			border-radius: 5px;
+			font-weight: bold;
+			cursor: pointer;
+			font-size: 16px;
+			transition: 0.3s;
+		}
+
+		.submit-btn:hover {
+			background-color: #ff0a16;
+			transform: translateY(-2px);
+		}
+
+		.cancel-link {
+			color: #ccc;
+			text-decoration: none;
+			font-size: 0.9em;
+		}
+
+		.cancel-link:hover {
+			text-decoration: underline;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="form-wrapper">
+		<h2>新規投稿する</h2>
+
+		<form th:action="@{/post/create}" method="post" enctype="multipart/form-data">
+			<label>映画タイトル</label>
+			<input type="text" name="movieTitle" placeholder="タイトルを入力してください" required />
+
+			<label>感想内容</label>
+			<textarea name="content" rows="6" placeholder="映画の感想を自由に書いてください" required></textarea>
+
+			<label>画像 (任意)</label>
+			<input type="file" name="imageFile" accept="image/*" />
+
+			<label>動画 (任意)</label>
+			<input type="file" name="videoFile" accept="video/*" />
+
+			<div class="button-group">
+				<button type="submit" class="submit-btn">投稿する</button>
+				<a th:href="@{/}" class="cancel-link">キャンセル</a>
+			</div>
+		</form>
+	</div>
+</body>
+
+</html>

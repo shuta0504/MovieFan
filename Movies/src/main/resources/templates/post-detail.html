@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title th:text="${post.movieTitle}+'-詳細'"></title>
+	<style>
+		body {
+			background-color: #1a1a1a;
+			color: white;
+			font-family: sans-serif;
+			padding: 40px;
+		}
+
+		.container {
+			max-width: 800px;
+			margin: auto;
+		}
+
+		.detail-card {
+			background: #2a2a2a;
+			padding: 30px;
+			border-radius: 12px;
+		}
+
+		.title {
+			color: #e50914;
+			font-size: 2.5em;
+			margin-bottom: 20px;
+		}
+
+		.full-content {
+			font-size: 1.2em;
+			line-height: 1.8;
+			white-space: pre-wrap;
+			margin-bottom: 30px;
+		}
+
+		.media-full img,
+		.media-full video {
+			width: 100%;
+			border-radius: 8px;
+			margin-bottom: 20px;
+		}
+
+		.back-link {
+			color: #ccc;
+			text-decoration: none;
+			display: inline-block;
+			margin-top: 20px;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="container">
+		<div class="detail-card">
+			<h1 class="title" th:text="${post.movieTitle}"></h1>
+			<p class="full-content" th:text="${post.content}"></p>
+
+			<div class="media-full">
+				<img th:if="${post.imageUrl}" th:src="${post.imageUrl}">
+				<video th:if="${post.videoUrl}" th:src="${post.videoUrl}" controls></video>
+			</div>
+			<p><small th:text="${#temporals.format(post.createdAt,'yyyy/MM/dd HH:mm')}"></small></p>
+		</div>
+
+		<div style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 25px;">
+
+			<div style="display: flex; gap: 20px;">
+
+				<a th:href="@{/post/edit/{id}(id=${post.id})}"
+					style="display: inline-block; width: 140px; height: 45px; line-height: 45px; background-color: #444; color: white; text-decoration: none; border-radius: 10px; font-weight: bold; font-size: 16px; text-align: center;">
+					編集する
+				</a>
+
+				<form th:action="@{/post/delete/{id}(id=${post.id})}" method="post"
+					onsubmit="return confirm('この投稿を削除してもよろしいですか？');" style="margin: 0;">
+					<button type="submit"
+						style="width: 140px; height: 45px; background-color: #e50914; color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; font-size: 16px; display: flex; align-items: center; justify-content: center;">
+						削除する
+					</button>
+				</form>
+			</div>
+			<div style="margin-top: 40px; border-top: 1px solid #444; padding-top: 20px;">
+				<h3 style="color: #e50914;">コメント一覧</h3>
+
+				<div th:each="comment : ${post.comments}"
+					style="background: #2a2a2a; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+					<p th:text="${comment.content}" style="margin: 0; color: #eee;"></p>
+
+					<div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+						<small th:text="${#temporals.format(comment.createdAt, 'yyyy/MM/dd HH:mm')}"
+							style="color: #888;"></small>
+
+						<a th:href="@{/comment/edit/{id}(id=${comment.id})}"
+							style="color: #e50914; text-decoration: none; font-size: 13px;">編集</a>
+
+						<form th:action="@{/comment/delete/{id}(id=${comment.id})}" method="post"
+							style="margin: 0; display: flex; align-items: center;"
+							onsubmit="return confirm('このコメントを削除してもよろしいですか？');">
+
+
+							<button type="submit"
+								style="background: none; border: none; color: #e50914; cursor: pointer; font-size: 13px; padding: 0;">
+								削除
+							</button>
+						</form>
+					</div>
+				</div>
+			</div>
+
+			<form th:action="@{/post/{id}/comment(id=${post.id})}" th:object="${comment}" method="post"
+				style="margin-top: 20px; width: 100%;">
+
+				<textarea name="content" th:field="*{content}" rows="3" placeholder="この映画にコメントする..."
+					style="width: 100%; background: #333; color: white; border: 1px solid #444; padding: 10px; border-radius: 8px; box-sizing: border-box; resize: none;"></textarea>
+
+				<div th:if="${#fields.hasErrors('content')}" th:errors="*{content}"
+					style="color: red; font-size: 12px; margin-top: 5px;">
+				</div>
+
+				<button type="submit"
+					style="margin-top: 10px; width: 100%; height: 40px; background-color: #e50914; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 15px; transition: background 0.2s;">
+					投稿する
+				</button>
+			</form>
+		</div>
+
+
+		<a th:href="@{/}" style="color: #ccc; text-decoration: none; font-size: 14px; opacity: 0.8;">← 一覧に戻る</a>
+
+	</div>
+
+	</div>
+
+
+	</div>
+</body>
+
+</html>

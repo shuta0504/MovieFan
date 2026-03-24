@@ -1,0 +1,106 @@
+/* 全体の背景設定 */
+body {
+	font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+	background-color: #121212;
+	/* 映画館のような深い黒 */
+	/* 背景画像を設定したい場合はここにURLを入れます */
+	background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+		url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?q=80&w=2070');
+	background-size: cover;
+	background-attachment: fixed;
+	background-position: center;
+	color: #ffffff;
+	margin: 0;
+	padding: 40px 20px;
+}
+
+h1 {
+	text-align: center;
+	font-size: 3em;
+	color: #FFD700;
+	/* シネマレッド */
+	text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+	margin-bottom: 30px;
+	letter-spacing: 4px;
+}
+
+
+.post-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 20px;
+	padding: 20px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+/* 投稿カードのデザイン */
+.post-card {
+	background: #2a2a2a;
+	padding: 20px;
+	width: 280px;
+	/* max-widthではなくwidthで固定すると形が安定します */
+	border-left: 4px solid #e50914;
+	/* 少し細くしてシャープに */
+	border-radius: 8px;
+	/* 角の丸みを少し強めてモダンに */
+	box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+	/* 影を深くして立体感を出す */
+	display: flex;
+	flex-direction: column;
+
+}
+
+.post-card:hover {
+	transform: translateY(-5px);
+	border-color: #e50914;
+}
+
+.movie-title {
+	font-size: 1.2em;
+	color: #e50914;
+	margin-bottom: 15px;
+	border-bottom: 2px solid #333;
+	padding-bottom: 10px;
+}
+
+.content {
+	font-size: 0.9em;
+	line-height: 1.8;
+	color: #ddd;
+	margin-bottom: 20px;
+	white-space: pre-wrap;
+	/* 入力時の改行や空白をそのまま反映し、端で折り返す */
+	overflow-wrap: break-word;
+	/* 長い英単語などがあっても強制的に折り返す */
+	text-align: left;
+}
+
+/* 新規投稿ボタン */
+.new-post-btn {
+	display: block;
+	width: fit-content;
+	margin: 0 auto 40px auto;
+	background-color: #e50914;
+	color: white;
+	padding: 12px 30px;
+	text-decoration: none;
+	border-radius: 30px;
+	font-weight: bold;
+	transition: background 0.3s;
+}
+
+.new-post-btn:hover {
+	background-color: #b20710;
+}
+
+.media-container img,
+.media-container video {
+	width: 100%;
+	height: 350px;
+	object-fit: cover;
+	border-radius: 4px;
+	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+	margin-top: 15px;
+}

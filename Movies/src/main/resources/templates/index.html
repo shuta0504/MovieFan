@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+
+<body xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>MOVIES FAN</title>
+		<style>
+			body {
+				font-family: 'Helvetica Neue';
+				background-color: #1a1a1a;
+				color: #eee;
+				padding: 20px;
+				margin: 0;
+			}
+
+			h1 {
+				text-align: center;
+				color: #e50914;
+				text-transform: uppercase;
+				letter-spacing: 2px;
+			}
+
+			.post-new-wrapper {
+				text-align: center;
+				margin: 30px 0;
+			}
+
+			.btn-new-post {
+				display: inline-block;
+				background-color: #e50914;
+				color: white;
+				text-decoration: none;
+				font-weight: bold;
+				padding: 12px 30px;
+				border-radius: 50px;
+				font-size: 1.1em;
+				transition: 0.3s;
+				box-shadow: 0 4px 15px rgba(229, 9, 20, 0, 3);
+			}
+
+			.post-card {
+				background: #2a2a2a;
+				padding: 15px;
+				margin: 10px auto;
+				max-width: 500px;
+				border-left: 5px solid #e50914;
+				border-radius: 4px;
+				box-shadow: 0 4px 15px rgba(40, 40, 40, 0.9);
+			}
+
+			.movie-title {
+				font-size: 1.3em;
+				/* 1.8emから縮小 */
+				color: #e50914;
+				margin-bottom: 10px;
+				border-bottom: 1px solid #333;
+				padding-bottom: 5px;
+			}
+
+			.content {
+				font-size: 0.95em;
+				line-height: 1.5;
+				color: #ccc;
+			}
+
+			.media-container img,
+			.media-container video {
+				width: 100%;
+				height: auto;
+				max-height: 150px;
+				object-fit: contain;
+				border-radius: 6px;
+				display: block;
+				margin: 10px auto;
+			}
+		</style>
+		<link rel="stylesheet" th:href="@{/css/style.css}">
+	</head>
+	<div>
+		<h1>Movies LINEUP🍿</h1>
+		<div class="post-new-wrapper">
+			<a th:href="@{/post/new}" class="btn-new-post">+新規投稿を作成</a>
+		</div>
+		<hr>
+
+		<div class="post-wrapper">
+
+			<div th:each="post : ${posts}" class="post-card">
+				<a th:href="@{/post/{id}(id=${post.id})}" style="text-decoration: none; color: inherit;">
+					<h2 class="movie-title" th:text="${post.movieTitle}">映画タイトル</h2>
+					<p class="content" th:text="${post.content}">ここに感想が表示されます</p>
+				</a>
+
+				<div class="media-container">
+					<img th:if="${post.imageUrl}" th:src="${post.imageUrl}" alt="投稿画像">
+					<video th:if="${post.videoUrl}" th:src="${post.videoUrl}" controls></video>
+				</div>
+				<div class="comment-section" style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
+
+					<div style="margin-bottom: 8px;">
+						<span style="color: #e50914; font-size: 0.9em; font-weight: bold;">
+							💬 <span th:text="${post.comments.size()}">0</span> 件のコメント
+						</span>
+					</div>
+
+					<div th:if="${!post.comments.isEmpty()}"
+						style="background: #222; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+						<p style="font-size: 0.85em; color: #bbb; margin: 0;" th:text="${post.comments[0].content}"></p>
+					</div>
+
+					<a th:href="@{/post/{id}(id=${post.id})}"
+						style="font-size: 0.85em; color: #888; text-decoration: none;">
+						コメント
+					</a>
+				</div>
+
+				<p><small
+						th:text="${post.createdAt != null ? #temporals.format(post.createdAt,'yyyy/MM/dd HH:mm') : ''}"></small>
+				</p>
+			</div>
+		</div>
+	</div>
+</body>
+
+</html>

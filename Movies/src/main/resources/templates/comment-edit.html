@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+	<meta charset="UTF-8">
+	<title>コメント編集</title>
+	<style>
+		body {
+			background-color: #141414;
+			color: white;
+			font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			margin: 0;
+		}
+
+		.edit-container {
+			background-color: #2a2a2a;
+			padding: 40px;
+			border-radius: 8px;
+			width: 100%;
+			max-width: 500px;
+			box-shadow: 0 15px 25px rgba(0, 0, 0, 0.5);
+		}
+
+		h2 {
+			color: #e50914;
+			margin-bottom: 20px;
+			font-size: 24px;
+		}
+
+		.form-group {
+			margin-bottom: 20px;
+
+		}
+
+		label {
+			display: block;
+			margin-bottom: 8px;
+			color: #b3b3b3;
+			font-size: 14px;
+		}
+
+		textarea {
+			width: 100%;
+			background-color: #333;
+			color: white;
+			border: 1px solid #444;
+			border-radius: 4px;
+			padding: 12px;
+			font-size: 16px;
+			box-sizing: border-box;
+			resize: none;
+			transition: border-color 0.3s;
+		}
+
+		textarea:focus {
+			outline: none;
+			border-color: #e50914;
+		}
+
+		.btn-update:hover {
+			background-color: #ff0a16;
+		}
+
+		.back-link {
+			display: block;
+			text-align: center;
+			margin-top: 20px;
+			color: #b3b3b3;
+			text-decoration: none;
+			font-size: 14px;
+		}
+
+		.back-link:hover {
+			text-decoration: underline;
+		}
+
+		.btn-update {
+			width: 100%;
+			padding: 12px;
+			background-color: #e50914;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			font-size: 16px;
+			font-weight: bold;
+			cursor: pointer;
+			transition: background 0.2s;
+		}
+
+		.btn-cancel {
+			color: #666;
+			text-decoration: none;
+			margin-left: 10px;
+		}
+	</style>
+	<!DOCTYPE html>
+	<html xmlns:th="http://www.thymeleaf.org">
+
+	<head>
+		<meta charset="UTF-8">
+		<title>コメント編集</title>
+		<style>
+			/* 全体の背景と文字色 */
+			body {
+				background-color: #141414;
+				/* Netflixの深い黒 */
+				color: white;
+				font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				height: 100vh;
+				margin: 0;
+			}
+
+			.edit-container {
+				background-color: #2a2a2a;
+				/* カードの背景 */
+				padding: 40px;
+				border-radius: 8px;
+				width: 100%;
+				max-width: 500px;
+				box-shadow: 0 15px 25px rgba(0, 0, 0, 0.5);
+			}
+
+			h2 {
+				color: #e50914;
+				/* Netflixレッド */
+				margin-bottom: 20px;
+				font-size: 24px;
+			}
+
+			.form-group {
+				margin-bottom: 20px;
+			}
+
+			label {
+				display: block;
+				margin-bottom: 8px;
+				color: #b3b3b3;
+				font-size: 14px;
+			}
+
+			/* 入力エリアのスタイル */
+			textarea {
+				width: 100%;
+				background-color: #333;
+				color: white;
+				border: 1px solid #444;
+				border-radius: 4px;
+				padding: 12px;
+				font-size: 16px;
+				box-sizing: border-box;
+				resize: none;
+				transition: border-color 0.3s;
+			}
+
+			textarea:focus {
+				outline: none;
+				border-color: #e50914;
+				/* フォーカス時に赤く光る */
+			}
+
+			/* ボタンのスタイル */
+			.btn-update {
+				width: 100%;
+				padding: 12px;
+				background-color: #e50914;
+				color: white;
+				border: none;
+				border-radius: 4px;
+				font-size: 16px;
+				font-weight: bold;
+				cursor: pointer;
+				transition: background 0.2s;
+			}
+
+			.btn-update:hover {
+				background-color: #ff0a16;
+			}
+
+			.back-link {
+				display: block;
+				text-align: center;
+				margin-top: 20px;
+				color: #b3b3b3;
+				text-decoration: none;
+				font-size: 14px;
+			}
+
+			.back-link:hover {
+				text-decoration: underline;
+			}
+		</style>
+	</head>
+
+<body>
+
+	<div class="edit-container">
+		<h2>コメントを編集</h2>
+
+		<form th:action="@{/comment/update/{id}(id=${comment.id})}" method="post">
+			<div class="form-group">
+				<label for="content">内容</label>
+				<textarea id="content" name="content" rows="5" th:text="${comment.content}" required></textarea>
+			</div>
+
+			<button type="submit" class="btn-update">更新を保存する</button>
+		</form>
+
+		<a class="back-link" th:href="@{/post/{id}(id=${postId})}">キャンセルして戻る</a>
+	</div>
+
+</body>
+
+</html>
