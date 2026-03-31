@@ -5,14 +5,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -22,11 +26,13 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.demo.entity.Comment;
 import com.example.demo.entity.Post;
+import com.example.demo.entity.User;
 import com.example.demo.repository.CommentRepository;
 import com.example.demo.repository.PostRepository;
 
@@ -42,10 +48,13 @@ public class PostController {
 
 		if (keyword != null && !keyword.isEmpty()) {
 			// 検索キーワードがある場合
-			posts = postRepository.searchByKeyword(keyword);
+			posts = postRepository.searchByKeywordWithLikes(keyword);
+			if (posts.isEmpty()) {
+				model.addAttribute("searchMessage", "「" + keyword + "」に一致する投稿は見つかりませんでした。");
+			}
 		} else {
 			// キーワードがない場合は全件取得
-			posts = postRepository.findAllWithLikes();
+			posts = postRepository.findAllWithLikesOrderByCreatedAtDesc();
 		}
 
 		model.addAttribute("posts", posts);
@@ -57,7 +66,8 @@ public class PostController {
 	private String uploadPath;
 
 	@GetMapping("/post/new")
-	public String newPost() {
+	public String newPost(Model model) {
+		model.addAttribute("post", new Post());
 		return "post-form";
 	}
 
@@ -71,10 +81,18 @@ public class PostController {
 	}
 
 	// 編集機能①
-	@GetMapping("/post/edit/{id}")
+	// PostController.java
+
+	@GetMapping("/post/edit/{id}") // 編集ボタンのリンク先URLに合わせてください
 	public String editPost(@PathVariable("id") Integer id, Model model) {
-		Post post = postRepository.findById(id).orElseThrow();
-		model.addAttribute("post", post); // 現在のデータをフォームに渡す
+		// 1. DBから編集対象のデータを取得
+		Post post = postRepository.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Invalid post Id:" + id));
+
+		// 2. 重要：HTML側の th:object="${post}" という名前に合わせてデータを渡す
+		model.addAttribute("post", post);
+
+		// 3. 編集画面のHTML名を返す
 		return "post-edit";
 	}
 
@@ -113,7 +131,7 @@ public class PostController {
 
 	// 削除機能
 	@PostMapping("/post/delete/{id}")
-	public String deletePost(@PathVariable("id") Integer id) {
+	public String deletePost(@PathVariable("id") Integer id, @AuthenticationPrincipal User loginUser) {
 		// 削除前にデータを取得（ファイル削除が必要な場合のため）
 		Post post = postRepository.findById(id).orElseThrow();
 
@@ -122,6 +140,11 @@ public class PostController {
 		// String fileName = post.getImageUrl().replace("/images/", "");
 		// new File(uploadPath + "/" + fileName).delete();
 		// }
+		// ログインユーザーのIDと、投稿の所有者IDを比較
+		if (loginUser == null || !post.getUserId().equals(loginUser.getId())) {
+			// 本人でない場合は削除させずに詳細画面へ戻す（エラーメッセージ等を付けても良い）
+			return "redirect:/post/" + id;
+		}
 
 		// データベースから削除
 		postRepository.deleteById(id);
@@ -150,8 +173,8 @@ public class PostController {
 		Post post = postRepository.findById(id).orElseThrow();
 		// 3. commentオブジェクトに必要な情報をセット
 		// ※ content は @ModelAttribute によって既に comment に入っているので setContent は不要です
-		comment.setPost(post);
-		comment.setCreatedAt(LocalDateTime.now());
+		comment.setPost(post);// コメントにポストを紐付けている
+		comment.setCreatedAt(LocalDateTime.now());// コメントに今の時間を紐づけている
 
 		// 保存
 		commentRepository.save(comment);
@@ -170,15 +193,6 @@ public class PostController {
 	}
 
 	// コメントを更新する
-	@PostMapping("/comment/update/{id}")
-	public String updateComment(@PathVariable("id") Integer id, @RequestParam("content") String content) {
-		Comment comment = commentRepository.findById(id).orElseThrow();
-
-		comment.setContent(content);
-		commentRepository.save(comment);
-
-		return "redirect:/post/" + comment.getPost().getId();
-	}
 
 	// コメントを削除する
 	@Transactional
@@ -198,25 +212,43 @@ public class PostController {
 		return "redirect:/post/" + postId;
 	}
 
+	// 投稿を新規作成する
 	@PostMapping("/post/create")
-	public String createPost(@RequestParam("movieTitle") String movieTitle, @RequestParam("content") String content,
-			@RequestParam(value = "youtubeVideoId", required = false) String youtubeVideoId,
-			@RequestParam("imageFile") MultipartFile imageFile, @RequestParam("videoFile") MultipartFile videoFile)
-			throws IOException {
+	public String createPost(@AuthenticationPrincipal User loginUser, @Valid @ModelAttribute Post post,
+			BindingResult bindingResult, // エラー結果を受け取る引数を追加
+			@RequestParam("imageFile") MultipartFile imageFile, @RequestParam("videoFile") MultipartFile videoFile,
+			RedirectAttributes redirectAttributes, Model model // エラー時に画面へ戻すために必要
+	) throws IOException {
+		// スペースを詰めたタイトルで重複チェック
+		String trimmedTitle = post.getMovieTitle().replace(" ", "").replace("　", "");
+		List<Post> existingPosts = postRepository.findByMovieTitleIgnoringSpaces(trimmedTitle);
 
-		Post post = new Post();
-		post.setMovieTitle(movieTitle);
-		post.setContent(content);
-		post.setYoutubeVideoId(youtubeVideoId);
-		post.setUserId(1); // ログイン機能ができるまでは一旦固定値の「１」でセット
+		if (!existingPosts.isEmpty()) {
+			redirectAttributes.addFlashAttribute("errorMessage", "そちらの投稿は既に存在しています。\nこちらをご覧ください。");
+			redirectAttributes.addFlashAttribute("duplicatePost", existingPosts.get(0));
+			return "redirect:/post/new";
+		}
 
-		// 画像の保存処理
+		// 1. バリデーションエラー（500文字超えなど）がある場合の処理
+		if (bindingResult.hasErrors()) {
+			// 入力画面（post-form.html）に戻す
+			return "post-form";
+		}
+
+		if (loginUser != null) {
+			post.setUserId(loginUser.getId());
+		} else {
+			return "redirect:/login";
+		}
+
+		// 画像の保存処理 (post.getMovieTitle() などは既にセットされています)
 		if (!imageFile.isEmpty()) {
 			String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
 			Path filePath = Paths.get(uploadPath, fileName);
 			Files.copy(imageFile.getInputStream(), filePath);
-			post.setImageUrl("/images/" + fileName); // 後ほど画像を表示するためのURLパス
+			post.setImageUrl("/images/" + fileName);
 		}
+
 		// 動画の保存処理
 		if (!videoFile.isEmpty()) {
 			String fileName = UUID.randomUUID() + "_" + videoFile.getOriginalFilename();
@@ -226,7 +258,29 @@ public class PostController {
 		}
 
 		postRepository.save(post);
-		return "redirect:/"; // 画像や動画をsaveした後のためredirect
+		return "redirect:/";
+	}
+
+//部分一致検索用API(サジェスト用)
+	// PostController.java
+
+	@GetMapping("/api/posts/suggestions")
+	@ResponseBody
+	public List<Map<String, Object>> getSuggestions(@RequestParam String title) {
+		if (title.length() < 2)
+			return List.of();
+
+		String trimmed = title.replace(" ", "").replace("　", "");
+		List<Post> posts = postRepository.findByMovieTitlePartially(trimmed);
+
+		// Postエンティティをそのまま返すとLazy読み込みエラーになるため、
+		// 必要なデータ（id, movieTitle）だけをMapに詰めて返します
+		return posts.stream().map(p -> {
+		Map<String, Object> map = new HashMap<>();
+			map.put("id", p.getId());
+			map.put("movieTitle", p.getMovieTitle());
+			return map;
+		}).collect(Collectors.toList());
 	}
 
 	// エラー発生時に優先的に動くエラーハンドラー

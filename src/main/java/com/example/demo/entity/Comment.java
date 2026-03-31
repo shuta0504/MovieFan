@@ -9,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -19,11 +21,22 @@ public class Comment {
 	private Integer id;
 
 	@NotBlank(message = "コメントを入力してください") // 空文字やスペースのみを防ぐ
-    @Size(max = 200, message = "コメントは200文字以内で入力してください") // 文字数制限
-    @Column(nullable = false)
+	@Size(max = 200, message = "コメントは200文字以内で入力してください") // 文字数制限
+	@Column(nullable = false)
 	private String content; // コメント内容
-	
+
 	private LocalDateTime createdAt;
+	private LocalDateTime updatedAt;
+
+	@PrePersist
+	protected void onCreate() {
+		this.createdAt = LocalDateTime.now();
+		this.setUpdatedAt(LocalDateTime.now());
+	}
+	@PreUpdate
+	protected void onUpdate() {
+	    this.setUpdatedAt(LocalDateTime.now());
+	}
 
 	@ManyToOne // 多くのコメントが、一つの投稿に紐付く
 	@JoinColumn(name = "post_id")
@@ -62,5 +75,11 @@ public class Comment {
 	// これが「comment.setPost(post)」に対応します
 	public void setPost(Post post) {
 		this.post = post;
+	}
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
 	}
 }

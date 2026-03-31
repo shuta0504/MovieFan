@@ -40,6 +40,7 @@
 				box-shadow: 0 4px 15px rgba(229, 9, 20, 0, 3);
 			}
 
+
 			.post-card {
 				background: #2a2a2a;
 				padding: 15px;
@@ -59,10 +60,42 @@
 				padding-bottom: 5px;
 			}
 
-			.content {
-				font-size: 0.95em;
-				line-height: 1.5;
-				color: #ccc;
+			/* 投稿内容のテキスト制限 */
+			.post-content {
+				display: -webkit-box;
+				-webkit-line-clamp: 5;
+				/* 5行で制限 */
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+				text-overflow: ellipsis;
+
+				/* 以下の設定を確認・追加 */
+				line-height: 1.5em;
+				/* 行間を固定 */
+				max-height: 7.5em;
+				/* line-height × 行数 (1.5 * 5) で高さを物理的に制限 */
+				white-space: normal;
+				/* 改行コードによる挙動を標準に戻す */
+				word-break: break-all;
+				/* 長い英単語なども強制的に折り返す */
+			}
+
+			/* 「続きを読む」のようなリンク風のデザイン */
+			.read-more {
+				color: #e50914;
+				/* サイトカラーの赤 */
+				font-size: 0.85em;
+				text-decoration: none;
+				display: block;
+				text-align: right;
+				/* 右寄せ */
+				margin-top: -5px;
+				margin-bottom: 15px;
+				font-weight: bold;
+			}
+
+			.read-more:hover {
+				text-decoration: underline;
 			}
 
 			.media-container img,
@@ -132,7 +165,79 @@
 					/* 新規投稿ボタンを押しやすく大きくする */
 					text-align: center;
 				}
+			}
 
+			/* --- 右上固定のユーザーメニュー --- */
+			.user-info-header {
+				position: fixed;
+				top: 10px;
+				right: 10px;
+				z-index: 1000;
+			}
+
+			/* カード全体のデザイン */
+			.user-status-card {
+				background: rgba(30, 30, 30, 0.9);
+				padding: 10px;
+				border-radius: 15px;
+				border: 1px solid #444;
+				box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+				backdrop-filter: blur(10px);
+				text-align: center;
+				min-width: 140px;
+			}
+
+			.username-label {
+				color: #e50914;
+				font-weight: bold;
+				display: block;
+				margin-bottom: 5px;
+			}
+
+			.status-text {
+				font-size: 0.8em;
+				color: #bbb;
+				display: block;
+				margin-bottom: 15px;
+			}
+
+			/* ボタンの共通スタイル（サイズを統一） */
+			.btn-cinema-style {
+				display: block;
+				width: 130px;
+				margin: 8px auto 0;
+				background: transparent;
+				border: 2px solid #e50914;
+				color: #fff;
+				text-decoration: none;
+				cursor: pointer;
+				transition: all 0.3s ease;
+				padding: 6px 0;
+				line-height: 1.2;
+			}
+
+			.btn-cinema-style:hover {
+				background: #e50914;
+				box-shadow: 0 0 15px rgba(229, 9, 20, 0.5);
+			}
+
+			.btn-cinema-style .small-text {
+				display: block;
+				font-family: 'Cinzel', serif;
+				font-size: 9px;
+				letter-spacing: 1px;
+			}
+
+			.btn-cinema-style .main-text {
+				font-family: 'Bebas Neue', sans-serif;
+				font-size: 16px;
+				letter-spacing: 2px;
+			}
+
+			/* ログアウトフォームの余白調整 */
+			.logout-form-inline {
+				margin: 0;
+				padding: 0;
 			}
 		</style>
 		<link rel="stylesheet" th:href="@{/css/style.css}">
@@ -154,64 +259,150 @@
 		<div class="post-new-wrapper">
 			<a th:href="@{/post/new}" class="btn-new-post">+新規投稿を作成</a>
 		</div>
-		<form th:action="@{/logout}" method="post" class="logout-form-the-end">
-			<button type="submit" class="btn-the-end">
-				<span class="small-text">Fin.</span>
-				<span class="main-text">LOGOUT</span>
-			</button>
-		</form>
+
+		<header class="user-info-header">
+			<div sec:authorize="isAuthenticated()" class="user-status-card">
+				<span class="username-label" sec:authentication="name">ユーザー名</span>
+				<span class="status-text">Log in</span>
+
+				<a th:href="@{/mypage}" class="btn-cinema-style">
+					<span class="small-text">User</span>
+					<span class="main-text">MY PAGE</span>
+				</a>
+
+				<form th:action="@{/logout}" method="post" class="logout-form-inline">
+					<button type="submit" class="btn-cinema-style">
+						<span class="small-text">Fin.</span>
+						<span class="main-text">LOG OUT</span>
+					</button>
+				</form>
+			</div>
+
+			<div sec:authorize="isAnonymous()" class="user-status-card">
+				<span class="status-text">Guest Mode</span>
+				<a th:href="@{/login}" class="btn-cinema-style">
+					<span class="small-text">Entry</span>
+					<span class="main-text">LOGIN</span>
+				</a>
+			</div>
+		</header>
+
 		<hr>
+		<div th:if="${searchMessage}"
+			style="text-align: center; margin: 30px auto; padding: 20px; background: #333; border-radius: 8px; max-width: 500px; border: 1px solid #e50914;">
+			<p style="color: #e50914; font-weight: bold; font-size: 1.1em; margin: 0;">
+				<span th:text="${searchMessage}">お探しのキーワードはありません</span>
+			</p>
+			<p style="font-size: 0.9em; color: #888; margin-top: 10px;">別のキーワードで試してみてください🍿</p>
+		</div>
 
 		<div class="post-wrapper">
 
 			<div th:each="post : ${posts}" class="post-card">
 				<a th:href="@{/post/{id}(id=${post.id})}" style="text-decoration: none; color: inherit;">
 					<h2 class="movie-title" th:text="${post.movieTitle}">映画タイトル</h2>
-					<p class="content" th:text="${post.content}">ここに感想が表示されます</p>
-				</a>
-
-				<div class="media-container">
-					<img th:if="${post.imageUrl}" th:src="${post.imageUrl}" alt="投稿画像">
-					<video th:if="${post.videoUrl}" th:src="${post.videoUrl}" controls></video>
-
-					<div class="video-container" th:if="${post.youtubeVideoId != null and !post.youtubeVideoId.empty}">
-						<iframe th:src="'https://www.youtube.com/embed/' + ${post.youtubeVideoId}" frameborder="0"
-							allowfullscreen></iframe>
-					</div>
-				</div>
-				<div class="comment-section" style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
-
-					<div style="margin-bottom: 8px;">
-						<span style="color: #e50914; font-size: 0.9em; font-weight: bold;">
-							💬 <span th:text="${post.comments.size()}">0</span> 件のコメント
-						</span>
-					</div>
-
-					<div th:if="${!post.comments.isEmpty()}"
-						style="background: #222; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
-						<p style="font-size: 0.85em; color: #bbb; margin: 0;" th:text="${post.comments[0].content}"></p>
-					</div>
-
-					<a th:href="@{/post/{id}(id=${post.id})}"
-						style="font-size: 0.85em; color: #888; text-decoration: none;">
-						コメント
+					<p class="post-content" th:text="${post.content}">ここに感想が表示されます</p>
+					<a th:href="@{/post/{id}(id=${post.id})}" class="read-more">
+						- 続きを読む
 					</a>
-				</div>
-				<div class="like-section" style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
-					<button type="button" th:onclick="|toggleLike(${post.id}, this)|"
-						style="background: none; border: 1px solid #444; color: #eee; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;">
-						<span style="color: #e50914;">❤️</span>
-						<span class="like-count" style="font-size: 0.9em; font-weight: bold;"
-							th:text="${post.likes != null ? post.likes.size() : 0}">0</span>
-					</button>
-				</div>
 
-				<p><small
-						th:text="${post.createdAt != null ? #temporals.format(post.createdAt,'yyyy/MM/dd HH:mm') : ''}"></small>
-				</p>
+					<div class="media-container">
+						<img th:if="${post.imageUrl}" th:src="${post.imageUrl}" alt="投稿画像">
+						<video th:if="${post.videoUrl}" th:src="${post.videoUrl}" controls></video>
+
+						<div class="video-container"
+							th:if="${post.youtubeVideoId != null and !post.youtubeVideoId.empty}">
+							<iframe th:src="'https://www.youtube.com/embed/' + ${post.youtubeVideoId}" frameborder="0"
+								allowfullscreen></iframe>
+						</div>
+					</div>
+					<div class="comment-section"
+						style="margin-top: 15px; border-top: 1px solid #333; padding-top: 10px;">
+
+						<div style="margin-bottom: 8px;">
+							<span style="color: #e50914; font-size: 0.9em; font-weight: bold;">
+								💬 <span th:text="${post.comments.size()}">0</span> 件のコメント
+							</span>
+						</div>
+
+						<div th:if="${!post.comments.isEmpty()}"
+							style="background: #222; padding: 8px; border-radius: 4px; margin-bottom: 10px;">
+							<p style="font-size: 0.85em; color: #bbb; margin: 0;" th:text="${post.comments[0].content}">
+							</p>
+						</div>
+
+						<a th:href="@{/post/{id}(id=${post.id})}"
+							style="font-size: 0.85em; color: #888; text-decoration: none;">
+							コメント
+						</a>
+					</div>
+					<div class="like-section" style="margin-top: 10px; display: flex; align-items: center; gap: 10px;">
+						<button type="button" th:onclick="|toggleLike(${post.id}, this)|"
+							style="background: none; border: 1px solid #444; color: #eee; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 5px;">
+							<span style="color: #e50914;">❤️</span>
+							<span class="like-count" style="font-size: 0.9em; font-weight: bold;"
+								th:text="${post.likes != null ? post.likes.size() : 0}">0</span>
+						</button>
+					</div>
+
+					<p><small
+							th:text="${post.createdAt != null ? #temporals.format(post.createdAt,'yyyy/MM/dd HH:mm') : ''}"></small>
+					</p>
 			</div>
 		</div>
 	</div>
+	<footer
+		style="background-color: #141414; padding: 50px 20px; border-top: 1px solid #333; margin-top: 50px; text-align: center;">
+		<div style="max-width: 1000px; margin: 0 auto;">
+
+			<p style="color: #fff; font-size: 16px; font-weight: bold; margin-bottom: 25px; letter-spacing: 1px;">CHECK
+				ON STREAMING</p>
+
+			<div style="display: flex; justify-content: center; align-items: center; gap: 30px; flex-wrap: wrap;">
+
+				<a href="https://www.youtube.com/" target="_blank" title="YouTube" style="transition: transform 0.3s;"
+					onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+					<svg width="40" height="40" viewBox="0 0 24 24" fill="#e50914">
+						<path
+							d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
+					</svg>
+				</a>
+
+				<a href="https://www.netflix.com/" target="_blank" title="Netflix" style="transition: transform 0.3s;"
+					onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+					<svg width="35" height="35" viewBox="0 0 24 24" fill="#e50914">
+						<path
+							d="M4.303 1.242c.508 0 .917.409.917.917v7.628l7.017-7.901a.917.917 0 0 1 1.414 1.171l-7.734 8.707 7.734 8.707a.917.917 0 0 1-1.414 1.171l-7.017-7.901v7.628a.917.917 0 0 1-1.834 0V2.159c0-.508.409-.917.917-.917z" />
+					</svg>
+				</a>
+
+				<a href="https://www.amazon.co.jp/gp/video/storefront" target="_blank" title="Prime Video"
+					style="transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.2)'"
+					onmouseout="this.style.transform='scale(1)'">
+					<svg width="40" height="40" viewBox="0 0 24 24" fill="#00A8E1">
+						<path
+							d="M15.93 17.13c-2.68 1.95-7.12 2.72-9.52 2.72-3.32 0-5.32-.96-5.32-2.73 0-2.3 2.81-2.92 5.34-2.92 1.34 0 2.94.13 4.1.4-.24-.54-.33-.94-.33-1.45 0-1.12.58-1.74 1.74-1.74.85 0 1.56.36 1.87 1.07.1.2.14.41.14.62 0 1.25-.94 2.8-2.66 4.03h4.64zm.44-5.46c-.22-.36-.67-.54-1.21-.54-.62 0-1.07.27-1.34.85-.1.22-.13.45-.13.67 0 .62.31 1.07.89 1.07.58 0 1.03-.27 1.3-.85.13-.22.18-.45.18-.71 0-.18-.09-.36-.69-.49z" />
+					</svg>
+				</a>
+
+				<a href="https://video.unext.jp/" target="_blank" title="U-NEXT"
+					style="color: #444444; text-decoration: none; font-weight: 900; font-size: 22px; transition: transform 0.3s;"
+					onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+					U-NEXT
+				</a>
+
+				<a href="https://www.disneyplus.com/" target="_blank" title="Disney+"
+					style="color:#336699; text-decoration: none; font-weight: bold; font-size: 18px; transition: transform 0.3s;"
+					onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+					Disney<span style="color: #3cf;">+</span>
+				</a>
+
+			</div>
+
+			<p style="color: #555; font-size: 12px; margin-top: 40px;">&copy; 2026 Movie Review App. 
+			</p>
+		</div>
+	</footer>
 	<script th:inline="javascript">
 		function toggleLike(postId, buttonElement) {
 			// /*[[...]]*/ の形式で書くことで、Eclipseのエラーを回避しつつThymeleafで値を取得できます
@@ -240,6 +431,20 @@
 					console.error('Error:', error);
 				});
 		}
+		// 画面読み込み時に実行
+		document.addEventListener("DOMContentLoaded", function () {
+			const contents = document.querySelectorAll('.post-content');
+			contents.forEach(content => {
+				// 実際の高さが表示領域（5行分）を超えていない場合
+				if (content.scrollHeight <= content.offsetHeight) {
+					// 次の要素（続きを読むリンク）を非表示にする
+					const readMoreLink = content.nextElementSibling;
+					if (readMoreLink && readMoreLink.classList.contains('read-more')) {
+						readMoreLink.style.display = 'none';
+					}
+				}
+			});
+		}); F
 	</script>
 </body>
 </body>

@@ -14,6 +14,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import lombok.Data;
 
@@ -33,6 +36,7 @@ public class Post {
 	private String movieTitle;
 
 	@Column(columnDefinition = "TEXT", nullable = false)
+	@Size(max = 500, message = "内容は500文字以内で入力してください")
 	private String content;
 
 	@Column(name = "image_url")
@@ -40,9 +44,9 @@ public class Post {
 
 	@Column(name = "video_url")
 	private String videoUrl;
-	
-	//youtube映画予告を差し込むためのentity
-	@Column(name="youtube_video_id")
+
+	// youtube映画予告を差し込むためのentity
+	@Column(name = "youtube_video_id")
 	private String youtubeVideoId;
 
 	@Column(name = "created_at", updatable = false)
@@ -50,8 +54,9 @@ public class Post {
 
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
-	
-	@OneToMany(mappedBy ="postId")
+
+	@JsonIgnore // これを追加 (import com.fasterxml.jackson.annotation.JsonIgnore;)
+	@OneToMany(mappedBy = "postId")
 	private List<Like> likes;
 
 	@PrePersist

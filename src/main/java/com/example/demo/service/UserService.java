@@ -19,6 +19,10 @@ public class UserService {
 
 	@Transactional
 	public void register(String username, String password) {
+
+		if (userRepository.findByUserName(username).isPresent()) {
+			throw new RuntimeException("USER_ALREADY_EXISTS");
+		}
 		User user = new User();
 		user.setUserName(username);
 

@@ -20,12 +20,16 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		http.csrf(csrf -> csrf.disable())
+				// SecurityConfig.java の一部
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/", "/register", "/post/**", "/comment/**", "/login", "/css/**", "/js/**",
-								"/images/**")
-						.permitAll()
-						// ★以下の1行を念のため追加（/comment/ 配下の全てのPOST/GETを許可）
-						.requestMatchers("/comment/**").permitAll().anyRequest().authenticated())
+						.requestMatchers("/", "/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+						// 詳細画面は誰でも見れるが、編集・更新・削除・作成はログイン必須にする
+						.requestMatchers("/post/new", "/post/edit/**", "/post/update/**", "/post/delete/**",
+								"/post/create")
+						.authenticated()
+						// コメントも投稿・削除などはログイン必須にするのが一般的
+						.requestMatchers("/post/*/comment", "/comment/edit/**", "/comment/delete/**").authenticated()
+						.anyRequest().authenticated())
 				.formLogin(login -> login.loginPage("/login").defaultSuccessUrl("/", true).permitAll())
 				.logout(logout -> logout.logoutSuccessUrl("/login?logout").permitAll());
 

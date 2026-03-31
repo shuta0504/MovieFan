@@ -46,15 +46,15 @@
 			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 			color: #e50914;
 		}
-		
+
 		h3 {
-					margin-top: 0;
-					margin-bottom: 20px;
-					font-size: 20px;
-					font-family: 'Cinzel', serif;
-					text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
-					color: #e50914;
-				}
+			margin-top: 0;
+			margin-bottom: 20px;
+			font-size: 20px;
+			font-family: 'Cinzel', serif;
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+			color: #e50914;
+		}
 
 		.input-group {
 			margin-bottom: 20px;
@@ -114,6 +114,13 @@
 		<h2>Registration</h2>
 		<h3>-ユーザー作成-</h3>
 
+		<div th:if="${errorMessage}" th:text="${errorMessage}"
+			style="background-color: #e67e22; color: white; padding: 15px; margin-bottom: 15px; border-radius: 5px; text-align: center; white-space: pre-line; width: 100%; box-sizing: border-box;">
+		</div>
+
+		<form th:action="@{/register}" method="post">
+		</form>
+
 		<form th:action="@{/register}" method="post">
 			<div class="input-group">
 				<label>ユーザー名</label>
@@ -129,6 +136,7 @@
 		</form>
 
 		<a th:href="@{/login}" class="back-link">ログイン画面へ戻る</a>
+
 	</div>
 </body>
 
